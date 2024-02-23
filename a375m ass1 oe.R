@@ -2,8 +2,6 @@ library(tidyverse)
 library(patchwork)
 science <- read.csv("exp4a.csv")
 
-### This code below is awesome - just need to work on aesthetics now.  
-
 ### Cit
 p1 <- science |>
   drop_na() |> 
@@ -19,10 +17,11 @@ p1 <- science |>
   mutate(Genotype = gsub("\\d", "", Genotype)) |>
   group_by(Metabolite, Concentration, Genotype) |>
   summarize(mean = mean(dpd), sd = sd(dpd)) |> 
-  filter(Metabolite == "Cit") |> 
+  filter(Metabolite == "Cit") |>
+  mutate(Concentration = Concentration + 0.5) |>
   ggplot(aes(x = Concentration, y = mean, color = Genotype)) + 
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, aes(color = Genotype)) +
+  geom_smooth(method="lm", formula = y ~ log(x), se = FALSE) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 3) +
   geom_vline(xintercept = 40, linetype = "dashed", color = "black") +
   labs(x = "Citrulline [µM]", y = "Doublings Per Day") +
@@ -52,9 +51,10 @@ p2 <- science |>
   group_by(Metabolite, Concentration, Genotype) |>
   summarize(mean = mean(dpd), sd = sd(dpd)) |> 
   filter(Metabolite == "Leu") |> 
+  mutate(Concentration = Concentration + 0.5) |>
   ggplot(aes(x = Concentration, y = mean, color = Genotype)) + 
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, aes(color = Genotype)) +
+  geom_smooth(method="lm", formula = y ~ log(x), se = FALSE) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 3) +
   geom_vline(xintercept = 160, linetype = "dashed", color = "black") +
   labs(x = "Leucine [µM]", y = "Doublings Per Day", title = "Cell Line: A375m ASS1-OE") + 
@@ -88,9 +88,10 @@ p3 <- science |>
   group_by(Metabolite, Concentration, Genotype) |>
   summarize(mean = mean(dpd), sd = sd(dpd)) |> 
   filter(Metabolite == "Phe") |> 
+  mutate(Concentration = Concentration + 0.5) |>
   ggplot(aes(x = Concentration, y = mean, color = Genotype)) + 
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, aes(color = Genotype)) +
+  geom_smooth(method="lm", formula = y ~ log(x), se = FALSE) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 3) +
   geom_vline(xintercept = 80, linetype = "dashed", color = "black") +
   labs(x = "Phenylalanine [µM]", y = "Doublings Per Day") +
@@ -105,6 +106,8 @@ p3 <- science |>
   scale_color_manual(values = c("WT" = "red","KO" = "blue"), breaks = c("WT", "KO"))
 
 
-plots <- p2 + p3 + p1 + plot_layout(ncol = 1)
+plots_a375 <- p2 + p3 + p1 + plot_layout(ncol = 1)
 
-print(plots)
+print(plots_a375)
+
+ggsave("a375m ass1 oe.jpg", plot = plots_a375, dpi = 300, width = 5.3, height = 6.5, units = "in")

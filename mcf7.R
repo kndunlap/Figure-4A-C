@@ -19,10 +19,11 @@ p1 <- mcf7 |>
   mutate(Genotype = gsub("\\d", "", Genotype)) |>
   group_by(Metabolite, Concentration, Genotype) |>
   summarize(mean = mean(dpd), sd = sd(dpd)) |> 
-  filter(Metabolite == "Cit") |> 
+  filter(Metabolite == "Cit") |>
+  mutate(Concentration = Concentration + 0.5) |>
   ggplot(aes(x = Concentration, y = mean, color = Genotype)) + 
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, aes(color = Genotype)) +
+  geom_smooth(method="lm", formula = y ~ log(x), se = FALSE) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 3) +
   geom_vline(xintercept = 40, linetype = "dashed", color = "black") +
   labs(x = "Citrulline [µM]", y = "Doublings Per Day") +
@@ -52,9 +53,10 @@ p2 <- mcf7 |>
   group_by(Metabolite, Concentration, Genotype) |>
   summarize(mean = mean(dpd), sd = sd(dpd)) |> 
   filter(Metabolite == "Leu") |> 
+  mutate(Concentration = Concentration + 0.5) |>
   ggplot(aes(x = Concentration, y = mean, color = Genotype)) + 
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, aes(color = Genotype)) +
+  geom_smooth(method="lm", formula = y ~ log(x), se = FALSE) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 3) +
   geom_vline(xintercept = 160, linetype = "dashed", color = "black") +
   labs(x = "Leucine [µM]", y = "Doublings Per Day", title = "Cell Line: MCF7") + 
@@ -85,12 +87,14 @@ p3 <- mcf7 |>
     names_to = "Genotype",
     values_to = "dpd") |> 
   mutate(Genotype = gsub("\\d", "", Genotype)) |>
+  mutate(Concentration = Concentration + 0.001) |>
   group_by(Metabolite, Concentration, Genotype) |>
   summarize(mean = mean(dpd), sd = sd(dpd)) |> 
   filter(Metabolite == "Phe") |> 
+  mutate(Concentration = Concentration + 0.5) |>
   ggplot(aes(x = Concentration, y = mean, color = Genotype)) + 
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, aes(color = Genotype)) +
+  geom_smooth(method="lm", formula = y ~ log(x), se = FALSE) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 3) +
   geom_vline(xintercept = 80, linetype = "dashed", color = "black") +
   labs(x = "Phenylalanine [µM]", y = "Doublings Per Day") +
@@ -105,6 +109,7 @@ p3 <- mcf7 |>
   scale_color_manual(values = c("WT" = "red","KO" = "blue"), breaks = c("WT", "KO"))
 
 
-plots <- p2 + p3 + p1 + plot_layout(ncol = 1)
+plots_mcf7 <- p2 + p3 + p1 + plot_layout(ncol = 1)
 
-print(plots)
+print(plots_mcf7)
+ggsave("mcf7.jpg", plot = plots_mcf7, dpi = 300, width = 5.3, height = 6.5, units = "in")
